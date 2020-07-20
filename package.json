@@ -1,0 +1,68 @@
+{
+  "_from": "neovis-ts@1.0.4",
+  "_id": "neovis-ts@1.0.4",
+  "_inBundle": false,
+  "_integrity": "sha512-Z8opHZR0K9s6oh6DD76YGrfqPeV67rJhk1ktKOHVfCmu777P92nRePDIrcRFahGWWApo1agl3uRv8zyASQDqxg==",
+  "_location": "/neovis-ts",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "neovis-ts@1.0.4",
+    "name": "neovis-ts",
+    "escapedName": "neovis-ts",
+    "rawSpec": "1.0.4",
+    "saveSpec": null,
+    "fetchSpec": "1.0.4"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/neovis-ts/-/neovis-ts-1.0.4.tgz",
+  "_shasum": "bf5806081dc44d585bcb8bc3c6b4575924fb5632",
+  "_spec": "neovis-ts@1.0.4",
+  "_where": "/Users/richb084/Documents/GitLab/amundsenfrontendlibrary/amundsen_application/static",
+  "author": {
+    "name": "Minh-Hoang DANG"
+  },
+  "bugs": {
+    "url": "https://github.com/neo4j-contrib/neovis.js/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "@types/node": "^12.0.5",
+    "@types/vis": "^4.21.16",
+    "neo4j-driver": "^1.7.4",
+    "tslint": "^5.17.0",
+    "typescript": "^3.5.1",
+    "vis": "^4.21.0"
+  },
+  "deprecated": false,
+  "description": "Graph visualizations powered by vis.js with data from Neo4j.",
+  "devDependencies": {
+    "css-loader": "^2.1.1",
+    "file-loader": "^0.11.1",
+    "style-loader": "^0.16.1",
+    "url-loader": "^2.0.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "homepage": "https://github.com/neo4j-contrib/neovis.js#readme",
+  "keywords": [],
+  "license": "Apache-2.0",
+  "main": "dist/neovis.js",
+  "name": "neovis-ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neo4j-contrib/neovis.js.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "types": "dist/index.d.ts",
+  "version": "1.0.4"
+}
