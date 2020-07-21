@@ -27,7 +27,7 @@ var NeoVis = /** @class */ (function () {
      *
      */
     function NeoVis(config) {
-        console.log("NeoVis init!!!!");
+        console.log("NeoVis init xxxxx");
         console.log(config);
         console.log(defaults_1.NeoVisDefault);
         this._config = config;
@@ -204,17 +204,21 @@ var NeoVis = /** @class */ (function () {
         var recordCount = 0;
         var session = this._driver.session();
         var stabilized = false;
+        console.log('this._query: ' + this._query)
         session
             .run(this._query, { limit: 30 })
             .subscribe({
                 onNext: function (record) {
                     recordCount++;
-                    // console.log("CLASS NAME");
-                    // console.log(record.constructor.name);
-                    // console.log(record);
+                    console.log("CLASS NAME");
+                    console.log(record.constructor.name);
+                    console.dir(record);
                     record.forEach(function (v, k, r) {
-                        // console.log("Constructor:");
-                        // console.log(v.constructor.name);
+                        console.log("Constructor:");
+                        console.log(v.constructor.name);
+                        console.dir(v);
+                        console.dir(k)
+                        console.dir(r)
                         if (v.constructor.name === "Node") {
                             var node = self.buildNodeVisObject(v);
                             try {
@@ -314,10 +318,10 @@ var NeoVis = /** @class */ (function () {
 
                     var container = self._container;
 
-                    console.log("maps!!!!!");
-                    console.log("_nodes");
+                    console.log("maps")
+                    console.log("_nodes")
                     console.dir(self._nodes);
-                    console.log("_edges");
+                    console.log("_edges")
                     console.dir(self._edges);
 
                     var rawNodes = [];
@@ -336,6 +340,17 @@ var NeoVis = /** @class */ (function () {
 
                     console.log("rawEdges");
                     console.dir(rawEdges);
+
+
+                    for (const rawEdge of rawEdges) {
+                        if (rawEdge.label === 'DOWNSTREAM') {
+                            var from = rawEdge.from;
+                            var to = rawEdge.to;
+                            rawEdge.from = to;
+                            rawEdge.to = from;
+                        }
+                        rawEdge.label = '';
+                    }
 
 
                     self._data = {
