@@ -6,7 +6,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 var neo4j = __importStar(require("neo4j-driver"));
 var vis = __importStar(require("vis"));
 var defaults_1 = require("./defaults");
@@ -33,7 +33,10 @@ var NeoVis = /** @class */ (function () {
         this._config = config;
         this._encrypted = config.encrypted || "ENCRYPTION_OFF";
         this._trust = config.trust || "TRUST_ALL_CERTIFICATES";
-        this._driver = neo4j.v1.driver(config.server_url || defaults_1.NeoVisDefault.neo4j.neo4jUri, neo4j.v1.auth.basic(config.server_user || defaults_1.NeoVisDefault.neo4j.neo4jUser, config.server_password || defaults_1.NeoVisDefault.neo4j.neo4jPassword), { encrypted: this._encrypted, trust: this._trust });
+        this._driver = neo4j.v1.driver(config.server_url || defaults_1.NeoVisDefault.neo4j.neo4jUri, neo4j.v1.auth.basic(config.server_user || defaults_1.NeoVisDefault.neo4j.neo4jUser, config.server_password || defaults_1.NeoVisDefault.neo4j.neo4jPassword), {
+            encrypted: this._encrypted,
+            trust: this._trust
+        });
         this._query = config.initial_cypher || defaults_1.NeoVisDefault.neo4j.initialQuery;
         this._nodes = new Map();
         this._edges = new Map();
@@ -42,6 +45,7 @@ var NeoVis = /** @class */ (function () {
         this._container = document.getElementById(config.container_id);
         this._events = new events_1.EventController();
     }
+
     NeoVis.prototype._addNode = function (node) {
         this._nodes.set(node.id, node);
     };
@@ -83,66 +87,56 @@ var NeoVis = /** @class */ (function () {
             // the cypher statement will be passed a parameter {id} with the value
             // of the internal node id
             var session = this._driver.session();
-            session.run(sizeCypher, { id: neo4j.v1.int(node.id) })
+            session.run(sizeCypher, {id: neo4j.v1.int(node.id)})
                 .then(function (result) {
                     result.records.forEach(function (record) {
                         record.forEach(function (v, k, r) {
                             if (typeof v === "number") {
-                                self._addNode({ id: node.id, value: v });
-                            }
-                            else if (v.constructor.name === "Integer") {
-                                self._addNode({ id: node.id, value: v.toNumber() });
+                                self._addNode({id: node.id, value: v});
+                            } else if (v.constructor.name === "Integer") {
+                                self._addNode({id: node.id, value: v.toNumber()});
                             }
                         });
                     });
                 });
-        }
-        else if (typeof sizeKey === "number") {
+        } else if (typeof sizeKey === "number") {
             node.value = sizeKey;
-        }
-        else {
+        } else {
             var sizeProp = self.getProperty(n.properties, sizeKey);
             if (sizeProp && typeof sizeProp === "number") {
                 // propety value is a number, OK to use
                 node.value = sizeProp;
-            }
-            else if (sizeProp && typeof sizeProp === "object" && sizeProp.constructor.name === "Integer") {
+            } else if (sizeProp && typeof sizeProp === "object" && sizeProp.constructor.name === "Integer") {
                 // property value might be a Neo4j Integer, check if we can call toNumber on it:
                 if (sizeProp.inSafeRange()) {
                     node.value = sizeProp.toNumber();
-                }
-                else {
+                } else {
                     // couldn't convert to Number, use default
                     node.value = 1.0;
                 }
-            }
-            else {
+            } else {
                 node.value = 1.0;
             }
         }
         // node caption
         if (typeof captionKey === "function") {
             node.label = captionKey(n);
-        }
-        else {
+        } else {
             node.label = self.getProperty(n.properties, "name") || label || "";
         }
         // community
         // behavior: color by value of community property (if set in config), then color by label
         if (!communityKey) {
             node.group = label;
-        }
-        else {
+        } else {
             try {
                 var communityProp = self.getProperty(n.properties, communityKey);
                 if (communityProp) {
                     node.group = communityProp.toNumber() || label || 0; // FIXME: cast to Integer
-                }
-                else {
+                } else {
                     node.group = "0";
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 node.group = "0";
             }
         }
@@ -151,6 +145,24 @@ var NeoVis = /** @class */ (function () {
         for (var key in n.properties) {
             node.title += "<strong>" + key + ":</strong>" + " " + this.getProperty(n.properties, key) + "<br>";
         }
+
+        let properties = n.properties;
+        if (properties) {
+            let dbKey = properties.key;
+            if (dbKey) {
+                //"nonprod.music_umg_reporting/streams_combined"
+                dbKey = dbKey.replace('databricks://', '');
+                let split = dbKey.split('/');
+                let tmp = split[0];
+                let i = tmp.indexOf('.');
+                let env = tmp.substring(0, i)
+                let db = tmp.substring(i + 1);
+                node.db = db;
+                node.env = env;
+                console.log('set db: ' + node.db);
+            }
+        }
+
         return node;
     };
     /**
@@ -159,7 +171,8 @@ var NeoVis = /** @class */ (function () {
      * @returns {vis.Edge}
      */
     NeoVis.prototype.buildEdgeVisObject = function (r) {
-        var weightKey = this._config && this._config.relationships && this._config.relationships[r.type] && this._config.relationships[r.type].thickness, captionKey = this._config && this._config.relationships && this._config.relationships[r.type] && this._config.relationships[r.type].caption;
+        var weightKey = this._config && this._config.relationships && this._config.relationships[r.type] && this._config.relationships[r.type].thickness,
+            captionKey = this._config && this._config.relationships && this._config.relationships[r.type] && this._config.relationships[r.type].caption;
         var edge = {};
         edge.id = r.identity.toInt();
         edge.from = r.start.toInt();
@@ -172,26 +185,21 @@ var NeoVis = /** @class */ (function () {
         // set relationship thickness
         if (weightKey && typeof weightKey === "string") {
             edge.value = this.getProperty(r.properties, weightKey);
-        }
-        else if (weightKey && typeof weightKey === "number") {
+        } else if (weightKey && typeof weightKey === "number") {
             edge.value = weightKey;
-        }
-        else {
+        } else {
             edge.value = 1.0;
         }
         // set caption
         if (typeof captionKey === "boolean") {
             if (!captionKey) {
                 edge.label = "";
-            }
-            else {
+            } else {
                 edge.label = r.type;
             }
-        }
-        else if (captionKey && typeof captionKey === "string") {
+        } else if (captionKey && typeof captionKey === "string") {
             edge.label = this.getProperty(r.properties, captionKey) || "";
-        }
-        else {
+        } else {
             edge.label = r.type;
         }
         return edge;
@@ -205,8 +213,9 @@ var NeoVis = /** @class */ (function () {
         var session = this._driver.session();
         var stabilized = false;
         console.log('this._query: ' + this._query)
+        var query = this._query;
         session
-            .run(this._query, { limit: 30 })
+            .run(this._query, {limit: 30})
             .subscribe({
                 onNext: function (record) {
                     recordCount++;
@@ -223,21 +232,17 @@ var NeoVis = /** @class */ (function () {
                             var node = self.buildNodeVisObject(v);
                             try {
                                 self._addNode(node);
-                            }
-                            catch (e) {
+                            } catch (e) {
                                 console.error(e);
                             }
-                        }
-                        else if (v.constructor.name === "Relationship") {
+                        } else if (v.constructor.name === "Relationship") {
                             var edge = self.buildEdgeVisObject(v);
                             try {
                                 self._addEdge(edge);
-                            }
-                            catch (e) {
+                            } catch (e) {
                                 console.error(e);
                             }
-                        }
-                        else if (v.constructor.name === "Path") {
+                        } else if (v.constructor.name === "Path") {
                             // console.log("PATH");
                             // console.log(v);
                             var n1 = self.buildNodeVisObject(v.start);
@@ -249,8 +254,7 @@ var NeoVis = /** @class */ (function () {
                                 self._addNode(self.buildNodeVisObject(obj.end));
                                 self._addEdge(self.buildEdgeVisObject(obj.relationship));
                             });
-                        }
-                        else if (v.constructor.name === "Array") {
+                        } else if (v.constructor.name === "Array") {
                             v.forEach(function (obj) {
                                 // console.log("Array element constructor:");
                                 // console.log(obj.constructor.name);
@@ -258,17 +262,14 @@ var NeoVis = /** @class */ (function () {
                                     var node = self.buildNodeVisObject(obj);
                                     try {
                                         self._addNode(node);
-                                    }
-                                    catch (e) {
+                                    } catch (e) {
                                         console.error(e);
                                     }
-                                }
-                                else if (obj.constructor.name === "Relationship") {
+                                } else if (obj.constructor.name === "Relationship") {
                                     var edge = self.buildEdgeVisObject(obj);
                                     try {
                                         self._addEdge(edge);
-                                    }
-                                    catch (e) {
+                                    } catch (e) {
                                         console.error(e);
                                     }
                                 }
@@ -317,6 +318,8 @@ var NeoVis = /** @class */ (function () {
                     };
 
                     var container = self._container;
+                    var activeNodeId = -1;
+
 
                     console.log("maps")
                     console.log("_nodes")
@@ -341,6 +344,25 @@ var NeoVis = /** @class */ (function () {
                     console.log("rawEdges");
                     console.dir(rawEdges);
 
+                    let startIndex = query.indexOf('="');
+
+                    if (startIndex != -1) {
+                        let a = query.substring(startIndex + 2);
+                        let endIndex = a.indexOf('"');
+
+                        if (endIndex != -1) {
+                            let b = a.substring(0, endIndex);
+                            for (const rawNode of rawNodes) {
+                                if (rawNode.label === b) {
+                                    activeNodeId = rawNode.id;
+                                    break;
+                                }
+                                console.dir(rawNode);
+                            }
+                            console.log('activeNodeId: ' + activeNodeId);
+                        }
+                    }
+
 
                     for (const rawEdge of rawEdges) {
                         if (rawEdge.label === 'DOWNSTREAM') {
@@ -361,23 +383,13 @@ var NeoVis = /** @class */ (function () {
                     console.log("_data");
                     console.dir(self._data);
 
-                    // console.log(self._data.nodes);
-                    // console.log(self._data.edges);
-                    // Create duplicate node for any self reference relationships
-                    // NOTE: Is this only useful for data model type data
-                    // self._data.edges = self._data.edges.map(
-                    //     function (item) {
-                    //          if (item.from == item.to) {
-                    //             var newNode = self._data.nodes.get(item.from)
-                    //             delete newNode.id;
-                    //             var newNodeIds = self._data.nodes.add(newNode);
-                    //             //console.log("Adding new node and changing self-ref to node: " + item.to);
-                    //             item.to = newNodeIds[0];
-                    //          }
-                    //          return item;
-                    //     }
-                    // );
                     self._network = new vis.Network(container, self._data, options);
+                    self._network.setSelection(
+                        {
+                            nodes: [activeNodeId],
+                            edges: []
+                        }
+                    )
 
                     console.log("_network");
                     console.dir(self._network);
@@ -401,13 +413,19 @@ var NeoVis = /** @class */ (function () {
                         // const graphOpt = this.body.data.edges._data[edgeId];
                         // graphOpt.font.size = 12;
                         // _network.clustering.updateEdge(edgeId, graphOpt);
+
+                        let location = '/table_detail/' + selectedNode.env + '/databricks/' + selectedNode.db + '/' + selectedNode.label;
+                        console.log('location: ' + location);
+
+                        // http://localhost:5000/table_detail/nonprod/music_umg_reporting/gbq_partner_amazon_prime_streams
+                        //window.open(location, '_self');
                     });
 
-                    self._network.on('stabilized', function() {
+                    self._network.on('stabilized', function () {
                         if (!stabilized) {
                             console.log('stabilized!!!');
                             var scaleOption = {
-                                scale : 0.7,
+                                scale: 0.7,
                                 offset: {
                                     x: 50,
                                     y: -30
@@ -418,7 +436,7 @@ var NeoVis = /** @class */ (function () {
                         }
                     })
 
-                    self._network.on('startStabilizing', function() {
+                    self._network.on('startStabilizing', function () {
                         console.log('startStabilizing!!!');
                     })
 
@@ -432,19 +450,24 @@ var NeoVis = /** @class */ (function () {
                                 session.close();
                             });
                     });
+
                     self._network.on("selectEdge", function (properties) {
+                        console.log('selectEdge!!!');
                         var cypher = "MATCH ()-[r:TRANSFER]->() WHERE ID(r) IN [" + properties.edges.join(", ") + "] RETURN r";
                         var session = self._driver.session();
                         session.run(cypher)
                             .then(function (results) {
                                 // console.log(cypher);
+                                console.dir(results);
                                 self._events.generateEvent(events_1.EdgeSelectionEvent, results.records);
                                 session.close();
                             });
                     });
                     // console.log("completed");
-                    setTimeout(function () { self._network.stopSimulation(); }, 10000);
-                    self._events.generateEvent(events_1.CompletionEvent, { record_count: recordCount });
+                    setTimeout(function () {
+                        self._network.stopSimulation();
+                    }, 10000);
+                    self._events.generateEvent(events_1.CompletionEvent, {record_count: recordCount});
                 },
                 onError: function (error) {
                     console.error(error);
@@ -515,7 +538,9 @@ var NeoVis = /** @class */ (function () {
                 self._network.selectNodes([nodeID]);
                 session.close();
             })
-            .catch(function (reason) { console.log(reason); });
+            .catch(function (reason) {
+                console.log(reason);
+            });
     };
     /**
      * Get property value from a Neo4J entity
