@@ -27,6 +27,7 @@ var NeoVis = /** @class */ (function () {
      *
      */
     function NeoVis(config) {
+        console.log("staring visualization");
         console.log("NeoVis init!!!!");
         console.log(config);
         console.log(defaults_1.NeoVisDefault);
