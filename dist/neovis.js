@@ -314,6 +314,12 @@ var NeoVis = /** @class */ (function () {
 
                     var container = self._container;
 
+                    console.log("maps")
+                    console.log("_nodes")
+                    console.dir(self._nodes);
+                    console.log("_edges")
+                    console.dir(self._edges);
+
                     var rawNodes = [];
                     for (const k of self._nodes.keys()) {
                         rawNodes.push(self._nodes.get(k));
