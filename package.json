@@ -1,6 +1,6 @@
 {
-  "_from": "neovis-ts@1.0.4",
-  "_id": "neovis-ts@1.0.4",
+  "_from": "neovis-ts@2.0.0",
+  "_id": "neovis-ts@2.0.0",
   "_inBundle": false,
   "_integrity": "sha512-Z8opHZR0K9s6oh6DD76YGrfqPeV67rJhk1ktKOHVfCmu777P92nRePDIrcRFahGWWApo1agl3uRv8zyASQDqxg==",
   "_location": "/neovis-ts",
@@ -8,20 +8,20 @@
   "_requested": {
     "type": "version",
     "registry": true,
-    "raw": "neovis-ts@1.0.4",
+    "raw": "neovis-ts@2.0.0",
     "name": "neovis-ts",
     "escapedName": "neovis-ts",
-    "rawSpec": "1.0.4",
+    "rawSpec": "2.0.0",
     "saveSpec": null,
-    "fetchSpec": "1.0.4"
+    "fetchSpec": "2.0.0"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/neovis-ts/-/neovis-ts-1.0.4.tgz",
+  "_resolved": "https://registry.npmjs.org/neovis-ts/-/neovis-ts-2.0.0.tgz",
   "_shasum": "bf5806081dc44d585bcb8bc3c6b4575924fb5632",
-  "_spec": "neovis-ts@1.0.4",
+  "_spec": "neovis-ts@2.0.0",
   "_where": "/Users/richb084/Documents/GitLab/amundsenfrontendlibrary/amundsen_application/static",
   "author": {
     "name": "Minh-Hoang DANG"
@@ -64,5 +64,5 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.4"
+  "version": "2.0.0"
 }

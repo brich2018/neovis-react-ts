@@ -27,7 +27,6 @@ var NeoVis = /** @class */ (function () {
      *
      */
     function NeoVis(config) {
-        console.log("staring visualization");
         console.log("NeoVis init!!!!");
         console.log(config);
         console.log(defaults_1.NeoVisDefault);
@@ -325,22 +324,22 @@ var NeoVis = /** @class */ (function () {
                         rawEdges.push(self._edges.get(k));
                     }
 
-                    let opt = {
-                        "clickToUse": true,
-                        "nodes": {
-                            "borderWidth": 3,
-                            "label": "test"
-                        },
-                        "font": {
-                            "color": "red",
-                            "size": 8
-                        }
-                    }
+                    console.log("created datasets")
+                    console.log("rawNodes");
+                    console.dir(rawNodes);
+
+                    console.log("rawEdges");
+                    console.dir(rawEdges);
+
 
                     self._data = {
-                        nodes: new vis.DataSet(rawNodes, opt),
-                        edges: new vis.DataSet(rawEdges, opt)
+                        nodes: new vis.DataSet(rawNodes),
+                        edges: new vis.DataSet(rawEdges)
                     };
+
+                    console.log("_data");
+                    console.dir(self._data);
+
                     // console.log(self._data.nodes);
                     // console.log(self._data.edges);
                     // Create duplicate node for any self reference relationships
@@ -358,6 +357,9 @@ var NeoVis = /** @class */ (function () {
                     //     }
                     // );
                     self._network = new vis.Network(container, self._data, options);
+
+                    console.log("_network");
+                    console.dir(self._network);
 
                     let scale = self._network.getScale();
                     console.log('scale: ' + scale);

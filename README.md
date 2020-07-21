@@ -307,4 +307,7 @@ When hierarchical layout is enabled you may choose betweeen `"hubsize"` (default
 
 `"TRUST_ALL_CERTIFICATES"` (default) or `"TRUST_SYSTEM_CA_SIGNED_CERTIFICATES"`
 
+#### `npm install`
+npm install https://github.com/brich2018/neovis-react-ts/tarball/master
+
 
