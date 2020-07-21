@@ -27,6 +27,7 @@ var NeoVis = /** @class */ (function () {
      *
      */
     function NeoVis(config) {
+        console.log("NeoVis init!!!!");
         console.log(config);
         console.log(defaults_1.NeoVisDefault);
         this._config = config;
@@ -84,17 +85,17 @@ var NeoVis = /** @class */ (function () {
             var session = this._driver.session();
             session.run(sizeCypher, { id: neo4j.v1.int(node.id) })
                 .then(function (result) {
-                result.records.forEach(function (record) {
-                    record.forEach(function (v, k, r) {
-                        if (typeof v === "number") {
-                            self._addNode({ id: node.id, value: v });
-                        }
-                        else if (v.constructor.name === "Integer") {
-                            self._addNode({ id: node.id, value: v.toNumber() });
-                        }
+                    result.records.forEach(function (record) {
+                        record.forEach(function (v, k, r) {
+                            if (typeof v === "number") {
+                                self._addNode({ id: node.id, value: v });
+                            }
+                            else if (v.constructor.name === "Integer") {
+                                self._addNode({ id: node.id, value: v.toNumber() });
+                            }
+                        });
                     });
                 });
-            });
         }
         else if (typeof sizeKey === "number") {
             node.value = sizeKey;
@@ -206,235 +207,225 @@ var NeoVis = /** @class */ (function () {
         session
             .run(this._query, { limit: 30 })
             .subscribe({
-            onNext: function (record) {
-                recordCount++;
-                // console.log("CLASS NAME");
-                // console.log(record.constructor.name);
-                // console.log(record);
-                record.forEach(function (v, k, r) {
-                    // console.log("Constructor:");
-                    // console.log(v.constructor.name);
-                    if (v.constructor.name === "Node") {
-                        var node = self.buildNodeVisObject(v);
-                        try {
-                            self._addNode(node);
-                        }
-                        catch (e) {
-                            console.error(e);
-                        }
-                    }
-                    else if (v.constructor.name === "Relationship") {
-                        var edge = self.buildEdgeVisObject(v);
-                        try {
-                            self._addEdge(edge);
-                        }
-                        catch (e) {
-                            console.error(e);
-                        }
-                    }
-                    else if (v.constructor.name === "Path") {
-                        // console.log("PATH");
-                        // console.log(v);
-                        var n1 = self.buildNodeVisObject(v.start);
-                        var n2 = self.buildNodeVisObject(v.end);
-                        self._addNode(n1);
-                        self._addNode(n2);
-                        v.segments.forEach(function (obj) {
-                            self._addNode(self.buildNodeVisObject(obj.start));
-                            self._addNode(self.buildNodeVisObject(obj.end));
-                            self._addEdge(self.buildEdgeVisObject(obj.relationship));
-                        });
-                    }
-                    else if (v.constructor.name === "Array") {
-                        v.forEach(function (obj) {
-                            // console.log("Array element constructor:");
-                            // console.log(obj.constructor.name);
-                            if (obj.constructor.name === "Node") {
-                                var node = self.buildNodeVisObject(obj);
-                                try {
-                                    self._addNode(node);
-                                }
-                                catch (e) {
-                                    console.error(e);
-                                }
+                onNext: function (record) {
+                    recordCount++;
+                    // console.log("CLASS NAME");
+                    // console.log(record.constructor.name);
+                    // console.log(record);
+                    record.forEach(function (v, k, r) {
+                        // console.log("Constructor:");
+                        // console.log(v.constructor.name);
+                        if (v.constructor.name === "Node") {
+                            var node = self.buildNodeVisObject(v);
+                            try {
+                                self._addNode(node);
                             }
-                            else if (obj.constructor.name === "Relationship") {
-                                var edge = self.buildEdgeVisObject(obj);
-                                try {
-                                    self._addEdge(edge);
-                                }
-                                catch (e) {
-                                    console.error(e);
-                                }
+                            catch (e) {
+                                console.error(e);
                             }
-                        });
-                    }
-                });
-            },
-            onCompleted: function () {
-                session.close();
-                var options = {
-                    interaction: {
-                        hover: true,
-                        hoverConnectedEdges: true,
-                        selectConnectedEdges: false,
-                    },
-                    nodes: {
-                        shape: "dot",
-                        font: {
-                            size: 14,
-                            strokeWidth: 3
-                        },
-                        // scaling: {
-                        //     min: 2,
-                        //     max: 10,
-                        //     label: {
-                        //         enabled: true
-                        //     }
-                        // },
-                        // ctxRenderer: function({ ctx, x, y, state: { selected, hover }, style }) {
-                        //     console.log('ctxRenderer');
-                        // }
-                    },
-                    edges: {
-                        arrows: self._config.visOptions.edges.arrows || defaults_1.NeoVisDefault.visjs.edges.arrows,
-                        font: {
-                            size: 10,
-                            color: "red"
-                        },
-                        length: 200
-                    },
-                    layout: self._config.visOptions.layout || defaults_1.NeoVisDefault.visjs.layout,
-                    physics: {
-                        // enabled: true,
-                        // timestep: 0.5,
-                        // stabilization: {
-                        //     iterations: 10
-                        // }
-                        adaptiveTimestep: true,
-                        barnesHut: {
-                            gravitationalConstant: -8000,
-                            springConstant: 0.04,
-                            springLength: 95
-                        },
-                        stabilization: false
-                    }
-                };
-
-                var container = self._container;
-
-                var rawNodes = [];
-                for (const k of self._nodes.keys()) {
-                    rawNodes.push(self._nodes.get(k));
-                }
-
-                var rawEdges = [];
-                for (const k of self._edges.keys()) {
-                    rawEdges.push(self._edges.get(k));
-                }
-
-                let opt = {
-                    "clickToUse": true,
-                    "nodes": {
-                        "borderWidth": 3,
-                        "label": "test"
-                    },
-                    "font": {
-                        "color": "red",
-                        "size": 8
-                    }
-                }
-
-                self._data = {
-                    nodes: new vis.DataSet(rawNodes, opt),
-                    edges: new vis.DataSet(rawEdges, opt)
-                };
-                // console.log(self._data.nodes);
-                // console.log(self._data.edges);
-                // Create duplicate node for any self reference relationships
-                // NOTE: Is this only useful for data model type data
-                // self._data.edges = self._data.edges.map(
-                //     function (item) {
-                //          if (item.from == item.to) {
-                //             var newNode = self._data.nodes.get(item.from)
-                //             delete newNode.id;
-                //             var newNodeIds = self._data.nodes.add(newNode);
-                //             //console.log("Adding new node and changing self-ref to node: " + item.to);
-                //             item.to = newNodeIds[0];
-                //          }
-                //          return item;
-                //     }
-                // );
-                self._network = new vis.Network(container, self._data, options);
-
-                let scale = self._network.getScale();
-                console.log('scale: ' + scale);
-                console.dir(self._network);
-
-                self._network.on('selectNode', (event, properties, senderId) => {
-                    console.log('selectNode!!!');
-                    console.dir(event);
-                    console.dir(properties);
-                    let nodeId = event.nodes[0];
-                    console.log('id: ' + nodeId);
-
-                    let currentNodes = self._nodes;
-
-                    let selectedNode = currentNodes.get(nodeId);
-                    console.dir(currentNodes);
-                    console.dir(selectedNode);
-                    // const graphOpt = this.body.data.edges._data[edgeId];
-                    // graphOpt.font.size = 12;
-                    // _network.clustering.updateEdge(edgeId, graphOpt);
-                });
-
-                self._network.on('stabilized', function() {
-                    if (!stabilized) {
-                        console.log('stabilized!!!');
-                        var scaleOption = {
-                            scale : 0.7,
-                            offset: {
-                                x: 50,
-                                y: -30
+                        }
+                        else if (v.constructor.name === "Relationship") {
+                            var edge = self.buildEdgeVisObject(v);
+                            try {
+                                self._addEdge(edge);
                             }
-                        };
-                        self._network.moveTo(scaleOption);
-                        stabilized = true;
-                    }
-                })
-
-                self._network.on('startStabilizing', function() {
-                    console.log('startStabilizing!!!');
-                })
-
-                self._network.on("selectNode", function (properties) {
-                    var cypher = "MATCH (n) WHERE ID(n) IN [" + properties.nodes.join(", ") + "] RETURN n";
-                    var session = self._driver.session();
-                    session.run(cypher)
-                        .then(function (results) {
-                        // console.log(cypher);
-                        self._events.generateEvent(events_1.NodeSelectionEvent, results.records);
-                        session.close();
+                            catch (e) {
+                                console.error(e);
+                            }
+                        }
+                        else if (v.constructor.name === "Path") {
+                            // console.log("PATH");
+                            // console.log(v);
+                            var n1 = self.buildNodeVisObject(v.start);
+                            var n2 = self.buildNodeVisObject(v.end);
+                            self._addNode(n1);
+                            self._addNode(n2);
+                            v.segments.forEach(function (obj) {
+                                self._addNode(self.buildNodeVisObject(obj.start));
+                                self._addNode(self.buildNodeVisObject(obj.end));
+                                self._addEdge(self.buildEdgeVisObject(obj.relationship));
+                            });
+                        }
+                        else if (v.constructor.name === "Array") {
+                            v.forEach(function (obj) {
+                                // console.log("Array element constructor:");
+                                // console.log(obj.constructor.name);
+                                if (obj.constructor.name === "Node") {
+                                    var node = self.buildNodeVisObject(obj);
+                                    try {
+                                        self._addNode(node);
+                                    }
+                                    catch (e) {
+                                        console.error(e);
+                                    }
+                                }
+                                else if (obj.constructor.name === "Relationship") {
+                                    var edge = self.buildEdgeVisObject(obj);
+                                    try {
+                                        self._addEdge(edge);
+                                    }
+                                    catch (e) {
+                                        console.error(e);
+                                    }
+                                }
+                            });
+                        }
                     });
-                });
-                self._network.on("selectEdge", function (properties) {
-                    var cypher = "MATCH ()-[r:TRANSFER]->() WHERE ID(r) IN [" + properties.edges.join(", ") + "] RETURN r";
-                    var session = self._driver.session();
-                    session.run(cypher)
-                        .then(function (results) {
-                        // console.log(cypher);
-                        self._events.generateEvent(events_1.EdgeSelectionEvent, results.records);
-                        session.close();
+                },
+                onCompleted: function () {
+                    session.close();
+                    var options = {
+                        interaction: {
+                            hover: true,
+                            hoverConnectedEdges: true,
+                            selectConnectedEdges: false,
+                        },
+                        nodes: {
+                            shape: "dot",
+                            font: {
+                                size: 14,
+                                strokeWidth: 3
+                            }
+                        },
+                        edges: {
+                            arrows: self._config.visOptions.edges.arrows || defaults_1.NeoVisDefault.visjs.edges.arrows,
+                            font: {
+                                size: 10,
+                                color: "red"
+                            },
+                            length: 200
+                        },
+                        layout: self._config.visOptions.layout || defaults_1.NeoVisDefault.visjs.layout,
+                        physics: {
+                            // enabled: true,
+                            // timestep: 0.5,
+                            // stabilization: {
+                            //     iterations: 10
+                            // }
+                            adaptiveTimestep: true,
+                            barnesHut: {
+                                gravitationalConstant: -8000,
+                                springConstant: 0.04,
+                                springLength: 95
+                            },
+                            stabilization: false
+                        }
+                    };
+
+                    var container = self._container;
+
+                    var rawNodes = [];
+                    for (const k of self._nodes.keys()) {
+                        rawNodes.push(self._nodes.get(k));
+                    }
+
+                    var rawEdges = [];
+                    for (const k of self._edges.keys()) {
+                        rawEdges.push(self._edges.get(k));
+                    }
+
+                    let opt = {
+                        "clickToUse": true,
+                        "nodes": {
+                            "borderWidth": 3,
+                            "label": "test"
+                        },
+                        "font": {
+                            "color": "red",
+                            "size": 8
+                        }
+                    }
+
+                    self._data = {
+                        nodes: new vis.DataSet(rawNodes, opt),
+                        edges: new vis.DataSet(rawEdges, opt)
+                    };
+                    // console.log(self._data.nodes);
+                    // console.log(self._data.edges);
+                    // Create duplicate node for any self reference relationships
+                    // NOTE: Is this only useful for data model type data
+                    // self._data.edges = self._data.edges.map(
+                    //     function (item) {
+                    //          if (item.from == item.to) {
+                    //             var newNode = self._data.nodes.get(item.from)
+                    //             delete newNode.id;
+                    //             var newNodeIds = self._data.nodes.add(newNode);
+                    //             //console.log("Adding new node and changing self-ref to node: " + item.to);
+                    //             item.to = newNodeIds[0];
+                    //          }
+                    //          return item;
+                    //     }
+                    // );
+                    self._network = new vis.Network(container, self._data, options);
+
+                    let scale = self._network.getScale();
+                    console.log('scale: ' + scale);
+                    console.dir(self._network);
+
+                    self._network.on('selectNode', (event, properties, senderId) => {
+                        console.log('selectNode!!!');
+                        console.dir(event);
+                        console.dir(properties);
+                        let nodeId = event.nodes[0];
+                        console.log('id: ' + nodeId);
+
+                        let currentNodes = self._nodes;
+
+                        let selectedNode = currentNodes.get(nodeId);
+                        console.dir(currentNodes);
+                        console.dir(selectedNode);
+                        // const graphOpt = this.body.data.edges._data[edgeId];
+                        // graphOpt.font.size = 12;
+                        // _network.clustering.updateEdge(edgeId, graphOpt);
                     });
-                });
-                // console.log("completed");
-                setTimeout(function () { self._network.stopSimulation(); }, 10000);
-                self._events.generateEvent(events_1.CompletionEvent, { record_count: recordCount });
-            },
-            onError: function (error) {
-                console.error(error);
-            }
-        });
+
+                    self._network.on('stabilized', function() {
+                        if (!stabilized) {
+                            console.log('stabilized!!!');
+                            var scaleOption = {
+                                scale : 0.7,
+                                offset: {
+                                    x: 50,
+                                    y: -30
+                                }
+                            };
+                            self._network.moveTo(scaleOption);
+                            stabilized = true;
+                        }
+                    })
+
+                    self._network.on('startStabilizing', function() {
+                        console.log('startStabilizing!!!');
+                    })
+
+                    self._network.on("selectNode", function (properties) {
+                        var cypher = "MATCH (n) WHERE ID(n) IN [" + properties.nodes.join(", ") + "] RETURN n";
+                        var session = self._driver.session();
+                        session.run(cypher)
+                            .then(function (results) {
+                                // console.log(cypher);
+                                self._events.generateEvent(events_1.NodeSelectionEvent, results.records);
+                                session.close();
+                            });
+                    });
+                    self._network.on("selectEdge", function (properties) {
+                        var cypher = "MATCH ()-[r:TRANSFER]->() WHERE ID(r) IN [" + properties.edges.join(", ") + "] RETURN r";
+                        var session = self._driver.session();
+                        session.run(cypher)
+                            .then(function (results) {
+                                // console.log(cypher);
+                                self._events.generateEvent(events_1.EdgeSelectionEvent, results.records);
+                                session.close();
+                            });
+                    });
+                    // console.log("completed");
+                    setTimeout(function () { self._network.stopSimulation(); }, 10000);
+                    self._events.generateEvent(events_1.CompletionEvent, { record_count: recordCount });
+                },
+                onError: function (error) {
+                    console.error(error);
+                }
+            });
     };
     /**
      * Clear the data for the visualization
@@ -494,12 +485,12 @@ var NeoVis = /** @class */ (function () {
         var session = this._driver.session();
         session.run(cypher)
             .then(function (result) {
-            console.log(cypher, result.records);
-            var nodeID = result.records[0].get("nodeID");
-            self._network.focus(nodeID, options);
-            self._network.selectNodes([nodeID]);
-            session.close();
-        })
+                console.log(cypher, result.records);
+                var nodeID = result.records[0].get("nodeID");
+                self._network.focus(nodeID, options);
+                self._network.selectNodes([nodeID]);
+                session.close();
+            })
             .catch(function (reason) { console.log(reason); });
     };
     /**
