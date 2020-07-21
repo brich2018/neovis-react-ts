@@ -410,15 +410,10 @@ var NeoVis = /** @class */ (function () {
                         let selectedNode = currentNodes.get(nodeId);
                         console.dir(currentNodes);
                         console.dir(selectedNode);
-                        // const graphOpt = this.body.data.edges._data[edgeId];
-                        // graphOpt.font.size = 12;
-                        // _network.clustering.updateEdge(edgeId, graphOpt);
 
                         let location = '/table_detail/' + selectedNode.env + '/databricks/' + selectedNode.db + '/' + selectedNode.label;
                         console.log('location: ' + location);
-
-                        // http://localhost:5000/table_detail/nonprod/music_umg_reporting/gbq_partner_amazon_prime_streams
-                        //window.open(location, '_self');
+                        window.open(location, '_self');
                     });
 
                     self._network.on('stabilized', function () {
