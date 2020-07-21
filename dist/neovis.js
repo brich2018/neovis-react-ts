@@ -27,7 +27,7 @@ var NeoVis = /** @class */ (function () {
      *
      */
     function NeoVis(config) {
-        console.log("NeoVis init xxxxx");
+        console.log("NeoVis init zzzzzz");
         console.log(config);
         console.log(defaults_1.NeoVisDefault);
         this._config = config;
