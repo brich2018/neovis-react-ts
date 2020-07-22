@@ -226,55 +226,60 @@ var NeoVis = /** @class */ (function () {
                         console.log("Constructor:");
                         console.log(v.constructor.name);
                         console.dir(v);
-                        console.dir(k)
-                        console.dir(r)
-                        if (v.constructor.name === "Node") {
-                            var node = self.buildNodeVisObject(v);
+                        console.dir(k);
+                        console.dir(r);
+
+                        let isRelationship = v.start != null && v.end != null;
+                        console.log('isRelationship: ' + isRelationship);
+
+                        if (!isRelationship) {
+                            const node = self.buildNodeVisObject(v);
                             try {
                                 self._addNode(node);
                             } catch (e) {
                                 console.error(e);
                             }
-                        } else if (v.constructor.name === "Relationship") {
-                            var edge = self.buildEdgeVisObject(v);
+                        } else {
+                            const edge = self.buildEdgeVisObject(v);
                             try {
                                 self._addEdge(edge);
                             } catch (e) {
                                 console.error(e);
                             }
-                        } else if (v.constructor.name === "Path") {
-                            // console.log("PATH");
-                            // console.log(v);
-                            var n1 = self.buildNodeVisObject(v.start);
-                            var n2 = self.buildNodeVisObject(v.end);
-                            self._addNode(n1);
-                            self._addNode(n2);
-                            v.segments.forEach(function (obj) {
-                                self._addNode(self.buildNodeVisObject(obj.start));
-                                self._addNode(self.buildNodeVisObject(obj.end));
-                                self._addEdge(self.buildEdgeVisObject(obj.relationship));
-                            });
-                        } else if (v.constructor.name === "Array") {
-                            v.forEach(function (obj) {
-                                // console.log("Array element constructor:");
-                                // console.log(obj.constructor.name);
-                                if (obj.constructor.name === "Node") {
-                                    var node = self.buildNodeVisObject(obj);
-                                    try {
-                                        self._addNode(node);
-                                    } catch (e) {
-                                        console.error(e);
-                                    }
-                                } else if (obj.constructor.name === "Relationship") {
-                                    var edge = self.buildEdgeVisObject(obj);
-                                    try {
-                                        self._addEdge(edge);
-                                    } catch (e) {
-                                        console.error(e);
-                                    }
-                                }
-                            });
                         }
+                        // else if (v.constructor.name === "Path") {
+                        //     // console.log("PATH");
+                        //     // console.log(v);
+                        //     var n1 = self.buildNodeVisObject(v.start);
+                        //     var n2 = self.buildNodeVisObject(v.end);
+                        //     self._addNode(n1);
+                        //     self._addNode(n2);
+                        //     v.segments.forEach(function (obj) {
+                        //         self._addNode(self.buildNodeVisObject(obj.start));
+                        //         self._addNode(self.buildNodeVisObject(obj.end));
+                        //         self._addEdge(self.buildEdgeVisObject(obj.relationship));
+                        //     });
+                        // } else if (v.constructor.name === "Array") {
+                        //     v.forEach(function (obj) {
+                        //         // console.log("Array element constructor:");
+                        //         // console.log(obj.constructor.name);
+                        //         if (obj.constructor.name === "Node") {
+                        //             var node = self.buildNodeVisObject(obj);
+                        //             try {
+                        //                 self._addNode(node);
+                        //             } catch (e) {
+                        //                 console.error(e);
+                        //             }
+                        //         } else if (obj.constructor.name === "Relationship") {
+                        //             var edge = self.buildEdgeVisObject(obj);
+                        //             try {
+                        //                 self._addEdge(edge);
+                        //             } catch (e) {
+                        //                 console.error(e);
+                        //             }
+                        //         }
+                        //     });
+                        // }
                     });
                 },
                 onCompleted: function () {
