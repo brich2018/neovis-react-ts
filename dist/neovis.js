@@ -27,7 +27,7 @@ var NeoVis = /** @class */ (function () {
      *
      */
     function NeoVis(config) {
-        console.log("NeoVis init zzzzzz");
+        console.log("NeoVis init");
         console.log(config);
         console.log(defaults_1.NeoVisDefault);
         this._config = config;
@@ -150,7 +150,6 @@ var NeoVis = /** @class */ (function () {
         if (properties) {
             let dbKey = properties.key;
             if (dbKey) {
-                //"nonprod.music_umg_reporting/streams_combined"
                 dbKey = dbKey.replace('databricks://', '');
                 let split = dbKey.split('/');
                 let tmp = split[0];
@@ -159,7 +158,6 @@ var NeoVis = /** @class */ (function () {
                 let db = tmp.substring(i + 1);
                 node.db = db;
                 node.env = env;
-                console.log('set db: ' + node.db);
             }
         }
 
@@ -219,19 +217,8 @@ var NeoVis = /** @class */ (function () {
             .subscribe({
                 onNext: function (record) {
                     recordCount++;
-                    console.log("CLASS NAME");
-                    console.log(record.constructor.name);
-                    console.dir(record);
                     record.forEach(function (v, k, r) {
-                        console.log("Constructor:");
-                        console.log(v.constructor.name);
-                        console.dir(v);
-                        console.dir(k);
-                        console.dir(r);
-
                         let isRelationship = v.start != null && v.end != null;
-                        console.log('isRelationship: ' + isRelationship);
-
                         if (!isRelationship) {
                             const node = self.buildNodeVisObject(v);
                             try {
@@ -325,13 +312,6 @@ var NeoVis = /** @class */ (function () {
                     var container = self._container;
                     var activeNodeId = -1;
 
-
-                    console.log("maps")
-                    console.log("_nodes")
-                    console.dir(self._nodes);
-                    console.log("_edges")
-                    console.dir(self._edges);
-
                     var rawNodes = [];
                     for (const k of self._nodes.keys()) {
                         rawNodes.push(self._nodes.get(k));
@@ -341,13 +321,6 @@ var NeoVis = /** @class */ (function () {
                     for (const k of self._edges.keys()) {
                         rawEdges.push(self._edges.get(k));
                     }
-
-                    console.log("created datasets")
-                    console.log("rawNodes");
-                    console.dir(rawNodes);
-
-                    console.log("rawEdges");
-                    console.dir(rawEdges);
 
                     let startIndex = query.indexOf('="');
 
@@ -385,9 +358,6 @@ var NeoVis = /** @class */ (function () {
                         edges: new vis.DataSet(rawEdges)
                     };
 
-                    console.log("_data");
-                    console.dir(self._data);
-
                     self._network = new vis.Network(container, self._data, options);
                     self._network.setSelection(
                         {
@@ -396,29 +366,17 @@ var NeoVis = /** @class */ (function () {
                         }
                     )
 
-                    console.log("_network");
-                    console.dir(self._network);
-
                     let scale = self._network.getScale();
                     console.log('scale: ' + scale);
                     console.dir(self._network);
 
                     self._network.on('selectNode', (event, properties, senderId) => {
-                        console.log('selectNode!!!');
-                        console.dir(event);
-                        console.dir(properties);
                         let nodeId = event.nodes[0];
                         console.log('id: ' + nodeId);
-
                         let currentNodes = self._nodes;
-
                         let selectedNode = currentNodes.get(nodeId);
-                        console.dir(currentNodes);
-                        console.dir(selectedNode);
-
                         let location = '/table_detail/' + selectedNode.env + '/databricks/' + selectedNode.db + '/' + selectedNode.label;
-                        console.log('location: ' + location);
-                        window.open(location, '_self');
+                        window.location.href = location;
                     });
 
                     self._network.on('stabilized', function () {
@@ -437,7 +395,6 @@ var NeoVis = /** @class */ (function () {
                     })
 
                     self._network.on('startStabilizing', function () {
-                        console.log('startStabilizing!!!');
                     })
 
                     self._network.on("selectNode", function (properties) {
@@ -452,7 +409,6 @@ var NeoVis = /** @class */ (function () {
                     });
 
                     self._network.on("selectEdge", function (properties) {
-                        console.log('selectEdge!!!');
                         var cypher = "MATCH ()-[r:TRANSFER]->() WHERE ID(r) IN [" + properties.edges.join(", ") + "] RETURN r";
                         var session = self._driver.session();
                         session.run(cypher)
