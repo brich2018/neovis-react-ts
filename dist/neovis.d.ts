@@ -41,6 +41,10 @@ export default class NeoVis {
     private _data;
     private _network;
     private _container;
+
+    private _loadingDiv;
+    private _controlDiv;
+
     private _events;
     /**
      *

@@ -27,7 +27,7 @@ var NeoVis = /** @class */ (function () {
      *
      */
     function NeoVis(config) {
-        console.log("NeoVis init");
+        console.log("NeoVis init!!!");
         console.log(config);
         console.log(defaults_1.NeoVisDefault);
         this._config = config;
@@ -43,6 +43,9 @@ var NeoVis = /** @class */ (function () {
         this._data = {};
         this._network = null;
         this._container = document.getElementById(config.container_id);
+        this._loadingDiv = document.getElementById(config.container_id + '_loading');
+        this._controlDiv = document.getElementById(config.container_id + '_control');
+
         this._events = new events_1.EventController();
     }
 
@@ -202,16 +205,19 @@ var NeoVis = /** @class */ (function () {
         }
         return edge;
     };
-    // public API
-    NeoVis.prototype.render = function () {
-        // connect to Neo4j instance
-        // run query
+
+
+    NeoVis.prototype.loadData = function (query) {
+        let activeQuery = query;
+
         var self = this;
         var recordCount = 0;
         var session = this._driver.session();
         var stabilized = false;
-        console.log('this._query: ' + this._query)
+        console.log('this._query: ' + activeQuery)
         var query = this._query;
+
+
         session
             .run(this._query, {limit: 30})
             .subscribe({
@@ -234,39 +240,6 @@ var NeoVis = /** @class */ (function () {
                                 console.error(e);
                             }
                         }
-                        // else if (v.constructor.name === "Path") {
-                        //     // console.log("PATH");
-                        //     // console.log(v);
-                        //     var n1 = self.buildNodeVisObject(v.start);
-                        //     var n2 = self.buildNodeVisObject(v.end);
-                        //     self._addNode(n1);
-                        //     self._addNode(n2);
-                        //     v.segments.forEach(function (obj) {
-                        //         self._addNode(self.buildNodeVisObject(obj.start));
-                        //         self._addNode(self.buildNodeVisObject(obj.end));
-                        //         self._addEdge(self.buildEdgeVisObject(obj.relationship));
-                        //     });
-                        // } else if (v.constructor.name === "Array") {
-                        //     v.forEach(function (obj) {
-                        //         // console.log("Array element constructor:");
-                        //         // console.log(obj.constructor.name);
-                        //         if (obj.constructor.name === "Node") {
-                        //             var node = self.buildNodeVisObject(obj);
-                        //             try {
-                        //                 self._addNode(node);
-                        //             } catch (e) {
-                        //                 console.error(e);
-                        //             }
-                        //         } else if (obj.constructor.name === "Relationship") {
-                        //             var edge = self.buildEdgeVisObject(obj);
-                        //             try {
-                        //                 self._addEdge(edge);
-                        //             } catch (e) {
-                        //                 console.error(e);
-                        //             }
-                        //         }
-                        //     });
-                        // }
                     });
                 },
                 onCompleted: function () {
@@ -330,6 +303,7 @@ var NeoVis = /** @class */ (function () {
 
                         if (endIndex != -1) {
                             let b = a.substring(0, endIndex);
+                            console.log('node match: ' + b);
                             for (const rawNode of rawNodes) {
                                 if (rawNode.label === b) {
                                     activeNodeId = rawNode.id;
@@ -338,6 +312,21 @@ var NeoVis = /** @class */ (function () {
                                 console.dir(rawNode);
                             }
                             console.log('activeNodeId: ' + activeNodeId);
+                        }
+                    }
+
+                    console.log('recursion here');
+                    // recurtion here
+
+                    for (const rawEdge of rawEdges) {
+                        if (rawEdge.label === 'DOWNSTREAM') {
+                            let currentNodes = self._nodes;
+                            let downstreamNode = currentNodes.get(rawEdge.to);
+                            console.log('found downstream!!!');
+                            console.dir(downstreamNode);
+                            let query = `MATCH (n1:Table)-[r]->(n2:Table) where n1.name=\"${downstreamNode.label}\" RETURN r, n1, n2`;
+                            console.log('sql: ' + query);
+                            //self.loadData(query);
                         }
                     }
 
@@ -351,7 +340,6 @@ var NeoVis = /** @class */ (function () {
                         }
                         rawEdge.label = '';
                     }
-
 
                     self._data = {
                         nodes: new vis.DataSet(rawNodes),
@@ -382,6 +370,7 @@ var NeoVis = /** @class */ (function () {
                     self._network.on('stabilized', function () {
                         if (!stabilized) {
                             console.log('stabilized!!!');
+
                             var scaleOption = {
                                 scale: 0.7,
                                 offset: {
@@ -391,6 +380,10 @@ var NeoVis = /** @class */ (function () {
                             };
                             self._network.moveTo(scaleOption);
                             stabilized = true;
+
+                            self._container.style.visibility = 'visible';
+                            self._loadingDiv.style.visibility = 'hidden';
+                            self._controlDiv.style.visibility = 'visible';
                         }
                     })
 
@@ -429,6 +422,22 @@ var NeoVis = /** @class */ (function () {
                     console.error(error);
                 }
             });
+
+    }
+
+
+    // public API
+    NeoVis.prototype.render = function () {
+        // connect to Neo4j instance
+        // run query
+        console.log('render called!');
+        console.dir(this._container);
+
+        this._container.style.visibility = 'hidden';
+        this._loadingDiv.style.visibility = 'visible';
+        this._controlDiv.style.visibility = 'hidden';
+
+        this.loadData(this._query);
     };
     /**
      * Clear the data for the visualization
