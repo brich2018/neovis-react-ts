@@ -341,6 +341,12 @@ var NeoVis = /** @class */ (function () {
                         rawEdge.label = '';
                     }
 
+
+                    console.log('rawNodes.length: ' + rawNodes.length);
+                    if (rawNodes.length === 0) {
+                        self._loadingDiv.innerHTML = 'no lineage data has been configured for this table';
+                    }
+
                     self._data = {
                         nodes: new vis.DataSet(rawNodes),
                         edges: new vis.DataSet(rawEdges)
